@@ -1,6 +1,6 @@
 // App.js
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { FaInstagram, FaTwitter, FaLinkedin, FaEnvelope, FaPhone, FaHome, FaInfoCircle, FaServicestack } from 'react-icons/fa';
 import './App.css';
 
@@ -17,10 +17,8 @@ const TopSection = () => {
         />
         <div className="navbar-links">
           <nav>
-            <a href="/about">About</a>
-            <a href="/careers">Careers</a>
-            <a href="/contact">Contact</a>
-            <a href="/services">Services</a>
+            <Link to="/">Home</Link>
+            <Link to="/careers">Careers</Link>
           </nav>
         </div>
         <button
@@ -34,10 +32,10 @@ const TopSection = () => {
         </button>
         {menuOpen && (
           <div className="mobile-menu">
-            <a href="/services" onClick={() => setMenuOpen(false)}>Services</a>
-            <a href="/contact" onClick={() => setMenuOpen(false)}>Contact</a>
-            <a href="/about" onClick={() => setMenuOpen(false)}>About</a>
-            <a href="/careers" onClick={() => setMenuOpen(false)}>Careers</a>
+            <Link to="/services" onClick={() => setMenuOpen(false)}>Services</Link>
+            <Link to="/contact" onClick={() => setMenuOpen(false)}>Contact</Link>
+            <Link to="/about" onClick={() => setMenuOpen(false)}>About</Link>
+            <Link to="/careers" onClick={() => setMenuOpen(false)}>Careers</Link>
           </div>
         )}
       </div>
@@ -281,9 +279,6 @@ const Jobs = () => {
   );
 };
 
-
-
-
 const Contact = () => (
   <section id="contact" className="section">
     <h2 className="section-title">Contact Us</h2>
@@ -308,10 +303,10 @@ const Footer = () => (
 
         <div className="footer-nav-section">
           <nav className="footer-nav">
-            <a href="/"> Home</a>
-            <a href="/about"> About</a>
-            <a href="/services"> Services</a>
-            <a href="/contact"> Contact</a>
+            <Link to="/"> Home</Link>
+            <Link to="/about"> About</Link>
+            <Link to="/services"> Services</Link>
+            <Link to="/contact"> Contact</Link>
           </nav>
         </div>
 
@@ -327,15 +322,29 @@ const Footer = () => (
   </footer>
 );
 
+function NotFound() {
+  return (
+    <section className="section">
+      <h2 className="section-title">404 - Not Found</h2>
+      <p>The page you are looking for does not exist.</p>
+      <Link to="/" className="card-btn">Go Home</Link>
+    </section>
+  );
+}
+
 function App() {
   return (
     <Router>
       <div className="App">
         <TopSection />
-        <About/>
-        <Services/>
-        <Contact/>
         <Routes>
+          <Route path="/" element={
+            <>
+              <About />
+              <Services />
+              <Contact />
+            </>
+          } />
           <Route path="/careers" element={<Jobs />} />
         </Routes>
         <Footer />
