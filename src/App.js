@@ -1,5 +1,6 @@
 // App.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { FaInstagram, FaTwitter, FaLinkedin, FaEnvelope, FaPhone, FaHome, FaInfoCircle, FaServicestack } from 'react-icons/fa';
 import './App.css';
 
@@ -16,10 +17,10 @@ const TopSection = () => {
         />
         <div className="navbar-links">
           <nav>
-            <a href="#about">About</a>
-            <a href="#contact">Contact</a>
-            <a href="#services">Services</a>
-
+            <a href="/about">About</a>
+            <a href="/careers">Careers</a>
+            <a href="/contact">Contact</a>
+            <a href="/services">Services</a>
           </nav>
         </div>
         <button
@@ -33,8 +34,10 @@ const TopSection = () => {
         </button>
         {menuOpen && (
           <div className="mobile-menu">
-            <a href="#services" onClick={() => setMenuOpen(false)}>Services</a>
-            <a href="#contact" onClick={() => setMenuOpen(false)}>Contact</a>
+            <a href="/services" onClick={() => setMenuOpen(false)}>Services</a>
+            <a href="/contact" onClick={() => setMenuOpen(false)}>Contact</a>
+            <a href="/about" onClick={() => setMenuOpen(false)}>About</a>
+            <a href="/careers" onClick={() => setMenuOpen(false)}>Careers</a>
           </div>
         )}
       </div>
@@ -61,7 +64,6 @@ const AboutIntro = () => {
   );
 };
 
-
 const About = () => (
   <section id="about" className="section about-section">
     <div className="about-content glass-card">
@@ -81,7 +83,6 @@ const About = () => (
   </section>
 );
 
-// services array stays the same
 const services = [
   {
     title: 'Web App Development',
@@ -135,14 +136,162 @@ const Services = () => (
   </section>
 );
 
+
+/* ---------- static data ---------- */
+
+const JOBS = [
+  {
+    id: 1,
+    title: 'Frontend Developer',
+    location: 'Remote',
+    description: `The Frontend Web Developer will be responsible for building custom, high-performance web apps using modern technologies that scale with the business. Additionally, they will work on responsive web design and collaborate with back-end developers and designers.
+
+Qualifications
+
+- Front-End Development and Responsive Web Design skills
+- Experience in Software Development and Web Development
+- Knowledge of Back-End Web Development
+- Proficiency in HTML, CSS, and JavaScript
+- Understanding of UI/UX principles
+- Experience with modern web development frameworks like React or Angular
+- Excellent problem-solving and analytical skills
+- Bachelor's degree in Computer Science or related field
+`,
+    experience: '1+ years',
+    rounds: '3 (Online Assignment, Technical, HR)',
+    skills: ['HTML','CSS','Bootstrap', 'JavaScript','TypeScript','React js', 'Tailwind CSS'],
+  },
+];
+
+const Jobs = () => {
+  const [descOpen, setDescOpen] = useState(null);     // which description is open
+  const [showForm, setShowForm] = useState(false);    // toggle modal
+  const [selectedJob, setSelectedJob] = useState(null);
+
+  const [formData, setFormData] = useState({
+    name: '', email: '', mobile: '',
+    gender: '', degree: '', experience: '',
+    howKnow: '', resume: '',position:"frontend"
+  });
+
+  /* ---------- helpers ---------- */
+  const toggleDesc   = id  => setDescOpen(descOpen === id ? null : id);
+  const handleChange = e   =>
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleApplyClick = job => { setSelectedJob(job); setShowForm(true); };
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    try {
+      const res = await fetch('https://brightloomserver.onrender.com/api/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, jobId: selectedJob.id }),
+      });
+      if (res.ok) {
+        alert(`Application submitted for ${selectedJob.title}!`);
+        setShowForm(false);
+        setFormData({
+          name: '', email: '', mobile: '',
+          gender: '', degree: '', experience: '',
+          howKnow: '', resume: '',position:''
+        });
+      } else alert('Something went wrong – please try again.');
+    } catch (err) {
+      console.error(err);
+      alert('Network error – please try again later.');
+    }
+  };
+
+  /* ---------- UI ---------- */
+  return (
+    <section id="Careers" className="section-ui">
+      <h2 className="section-title-ui">Open Positions</h2>
+
+      <div className="card-container-ui">
+        {JOBS.map(job => (
+          <article className="glass-card-ui" key={job.id}>
+            <h3>{job.title}</h3>
+            <p className="subtitle-ui">{job.location}</p>
+
+            <ul className="meta">
+              <li><strong>Experience:</strong> {job.experience}</li>
+              <li><strong>Rounds:</strong> {job.rounds}</li>
+              <li><strong>Skills:</strong> {job.skills.join(', ')}</li>
+            </ul>
+
+            <button className="card-btn" onClick={() => toggleDesc(job.id)}>
+              {descOpen === job.id ? 'Hide Description' : 'Show Description'}
+            </button>
+            {descOpen === job.id && <p className="desc">{job.description}</p>}
+
+            <button className="apply-btn" onClick={() => handleApplyClick(job)}>
+              Apply
+            </button>
+          </article>
+        ))}
+      </div>
+
+      {showForm && (
+        <div className="modal-overlay" role="dialog" aria-modal="true">
+          <div className="modal">
+            <button
+              className="close-btn"
+              aria-label="Close"
+              onClick={() => setShowForm(false)}
+            >
+              &times;
+            </button>
+
+            <h3 className="modal-title">Apply for {selectedJob?.title}</h3>
+
+            <form className="form-container" onSubmit={handleSubmit}>
+              <input  name="name"       placeholder="Name"                       value={formData.name}       onChange={handleChange} required />
+              <input  name="email"      type="email" placeholder="Email"         value={formData.email}      onChange={handleChange} required />
+              <input  name="mobile"     type="tel"   placeholder="Mobile"        value={formData.mobile}     onChange={handleChange} required />
+
+              <select name="gender" value={formData.gender} onChange={handleChange} required>
+                <option value="">Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+
+              <select name="degree" value={formData.degree} onChange={handleChange} required>
+                <option value="">Highest Degree</option>
+                <option value="btech">B.Tech</option>
+                <option value="bsc">B.Sc</option>
+                <option value="btech">M.Tech</option>
+                <option value="bsc">BAA</option>
+
+
+                <option value="other">Other</option>
+              </select>
+
+              <input  name="experience" placeholder="Experience (e.g. 2 yrs React)" value={formData.experience} onChange={handleChange} required />
+              <input  name="howKnow"    placeholder="How did you hear about us?"    value={formData.howKnow}    onChange={handleChange} required />
+              <input  name="resume"     type="url" placeholder="Resume Link (Drive, Dropbox…)" value={formData.resume} onChange={handleChange} required />
+
+              <button type="submit" className="submit-btn">Submit Application</button>
+            </form>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+};
+
+
+
+
 const Contact = () => (
   <section id="contact" className="section">
     <h2 className="section-title">Contact Us</h2>
     <form className="glass-form" onSubmit={(e) => { e.preventDefault(); alert('Message sent!'); }}>
-      <input type="text" placeholder="Name" required />
-      <input type="email" placeholder="Email" required />
-      <textarea placeholder="Message" required></textarea>
-      <button type="submit">Send</button>
+      <input type="text" className="contact-input" placeholder="Name" required />
+      <input type="email" className="contact-input" placeholder="Email" required />
+      <textarea className="contact-textarea" placeholder="Message" required></textarea>
+      <button type="submit" className="contact-btn">Send</button>
     </form>
   </section>
 );
@@ -178,18 +327,20 @@ const Footer = () => (
   </footer>
 );
 
-
-
 function App() {
   return (
-    <div className="App">
-      <TopSection />
-      <About/>
-
-      <Services />
-      <Contact />
-      <Footer />
-    </div>
+    <Router>
+      <div className="App">
+        <TopSection />
+        <About/>
+        <Services/>
+        <Contact/>
+        <Routes>
+          <Route path="/careers" element={<Jobs />} />
+        </Routes>
+        <Footer />
+      </div>
+    </Router>
   );
 }
 
